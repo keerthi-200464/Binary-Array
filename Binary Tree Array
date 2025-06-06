@@ -1,0 +1,105 @@
+
+
+import java.util.*;
+
+public class Main {
+    // ListNode definition
+    static class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+
+    // TreeNode definition
+    static class TreeNode {
+        int val;
+        TreeNode left;
+        TreeNode right;
+        TreeNode() {}
+        TreeNode(int val) { this.val = val; }
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    // Converts sorted linked list to BST
+    static class Solution {
+        public TreeNode sortedListToBST(ListNode head) {
+            if (head == null) return null;
+            if (head.next == null) return new TreeNode(head.val);
+
+            ListNode prev = null, slow = head, fast = head;
+            while (fast != null && fast.next != null) {
+                prev = slow;
+                slow = slow.next;
+                fast = fast.next.next;
+            }
+
+            if (prev != null) prev.next = null;
+
+            TreeNode root = new TreeNode(slow.val);
+            root.left = (slow != head) ? sortedListToBST(head) : null;
+            root.right = sortedListToBST(slow.next);
+
+            return root;
+        }
+    }
+
+    // Helper: Build linked list from array
+    public static ListNode buildLinkedList(int[] nums) {
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        for (int num : nums) {
+            current.next = new ListNode(num);
+            current = current.next;
+        }
+        return dummy.next;
+    }
+
+    // Serialize BST to Leetcode format: level order with nulls
+    public static List<String> serialize(TreeNode root) {
+        List<String> result = new ArrayList<>();
+        if (root == null) return result;
+
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            if (node == null) {
+                result.add("null");
+            } else {
+                result.add(String.valueOf(node.val));
+                queue.offer(node.left);
+                queue.offer(node.right);
+            }
+        }
+
+        // Trim trailing nulls
+        int i = result.size() - 1;
+        while (i >= 0 && result.get(i).equals("null")) {
+            result.remove(i--);
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter sorted integers (space separated):");
+        String[] tokens = sc.nextLine().split(" ");
+        int[] nums = Arrays.stream(tokens).mapToInt(Integer::parseInt).toArray();
+
+        ListNode head = buildLinkedList(nums);
+        Solution sol = new Solution();
+        TreeNode bstRoot = sol.sortedListToBST(head);
+
+        List<String> output = serialize(bstRoot);
+        System.out.println("Output: " + output);
+    }
+}
+
